@@ -1,0 +1,11 @@
+[package]
+name = "sunlite"
+version = "0.1.0"
+license = "MIT"
+description = "Minimalistic 2D Game Engine for Rust."
+authors = ["Rico A. Beti <rico.beti@silentbyte.com>"]
+repository = "https://github.com/SilentByte/sunlite.git"
+homepage = "https://github.com/SilentByte/sunlite"
+readme = "README.md"
+
+[dependencies]
