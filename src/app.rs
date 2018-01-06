@@ -2,6 +2,8 @@
 //! Game app and context initialization.
 //!
 
+use std::collections::VecDeque;
+
 use glutin;
 use glutin::GlContext;
 use glutin::GlWindow;
@@ -9,7 +11,13 @@ use glutin::EventsLoop as GlEventsLoop;
 use glutin::Event as GlEvent;
 use glutin::WindowEvent as GlWindowEvent;
 
-use std::collections::VecDeque;
+pub enum Event {
+    Idle,
+    Close,
+    Input,
+    Update,
+    Render,
+}
 
 pub struct App {
     gl_window: GlWindow,
@@ -17,22 +25,34 @@ pub struct App {
 }
 
 impl App {
-    pub fn run(mut self) {
-        let mut event_queue: VecDeque<GlEvent> = VecDeque::new();
-        'main_loop: loop {
-            self.gl_loop.poll_events(|e| {
-                event_queue.push_back(e);
-            });
+    fn translate_native_event(&mut self, native_event: GlEvent) -> Option<Event> {
+        match native_event {
+            GlEvent::WindowEvent { event: we, .. } => {
+                match we {
+                    GlWindowEvent::Closed => Some(Event::Close),
+                    _ => None
+                }
+            }
+            _ => None
+        }
+    }
 
-            while let Some(e) = event_queue.pop_front() {
-                if let GlEvent::WindowEvent {event: e, ..} = e {
-                    match e {
-                        GlWindowEvent::Closed => break 'main_loop,
-                        _ => {}
-                    }
+    pub fn run(&mut self) -> Option<Event> {
+        let mut event_queue: VecDeque<GlEvent> = VecDeque::new();
+        self.gl_loop.poll_events(|e| {
+            event_queue.push_back(e);
+        });
+
+        while let Some(native_event) = event_queue.pop_front() {
+            if let Some(e) = self.translate_native_event(native_event) {
+                match e {
+                    Event::Close => return None,
+                    _ => return Some(e)
                 }
             }
         }
+
+        Some(Event::Idle)
     }
 }
 
@@ -61,7 +81,7 @@ impl AppBuilder {
 
     pub fn build(&self) -> App {
         let window_builder = glutin::WindowBuilder::new()
-            .with_title("Sunlite")
+            .with_title(self.title.clone())
             .with_dimensions(self.window_size.width, self.window_size.height);
 
         let context_builder = glutin::ContextBuilder::new();
@@ -70,7 +90,7 @@ impl AppBuilder {
         let window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
 
         unsafe {
-            window.make_current();
+            window.make_current().expect("Failed to switch GL context to app.");
         };
 
         App {
