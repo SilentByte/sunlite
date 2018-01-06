@@ -15,6 +15,7 @@ use gfx_window_glutin;
 type ColorFormat = gfx::format::Rgba8;
 type DepthFormat = gfx::format::DepthStencil;
 
+#[derive(Debug)]
 pub enum Event {
     Idle,
     Close,
@@ -52,7 +53,7 @@ impl App {
             event_queue.push_back(e);
         });
 
-        self.gfx_cmd_queue.clear(&self.gfx_main_fbo.clone(), [1.0, 0.0, 0.0, 0.0]);
+        self.gfx_cmd_queue.clear(&self.gfx_main_fbo.clone(), [1.0, 0.78, 0.38, 0.0]);
         self.gfx_cmd_queue.clear_depth(&self.gfx_main_dbo.clone(), 1.0);
 
         self.gfx_cmd_queue.flush(&mut self.gfx_device);
