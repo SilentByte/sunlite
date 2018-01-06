@@ -9,3 +9,4 @@ homepage = "https://github.com/SilentByte/sunlite"
 readme = "README.md"
 
 [dependencies]
+glutin = "0.12"
